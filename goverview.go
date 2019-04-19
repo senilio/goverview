@@ -117,15 +117,6 @@ func main() {
 
 	x := map[string]*VM{}
 
-	// 	"555": {name: "berra", ram: 4096, cpu: 1},
-	// 	"111": {name: "sven", ram: 2048, cpu: 1},
-	// 	"999": {name: "adam", ram: 1024, cpu: 2},
-	// 	"444": {name: "ylva", ram: 4096, cpu: 4},
-	// 	"222": {name: "fred", ram: 512, cpu: 1},
-	// 	"000": {name: "caesar", ram: 4096, cpu: 8},
-	// 	"888": {name: "jojo", ram: 8192, cpu: 1},
-	// }
-	// x["123"] = {name: "berra", ram: 4096, cpu: 1}
 	for _, vm := range vms {
 		entry := new(VM)
 		entry.name = vm.Name
