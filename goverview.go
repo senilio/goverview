@@ -9,7 +9,6 @@ import (
 	"net/url"
 	"os"
 	//"sort"
-
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/view"
 	"github.com/vmware/govmomi/vim25/mo"
@@ -17,9 +16,17 @@ import (
 
 // VM struct
 type VM struct {
-	name string
-	ram  int32
-	cpu  int32
+	Name        string
+	MemoryMB    int32
+	NumCPU      int32
+	RuntimeHost string
+	PowerState  interface{}
+	Annotation  string
+}
+
+// Host struct
+type Host struct {
+	id string
 }
 
 func main() {
@@ -115,18 +122,38 @@ func main() {
 		log.Fatal(err)
 	}
 
-	x := map[string]*VM{}
+	/////////////////////////
 
+	Hypervisors := map[string]*Host{}
+
+	// Used to translate hypervisor ID to real hostname
+	HypervisorTranslate := map[string]string{}
+
+	for _, v := range hosts {
+		HypervisorTranslate[v.Self.Value] = v.Name
+		entry := new(Host)
+		entry.id = v.Self.Value
+		Hypervisors[v.Name] = entry
+	}
+	for k, v := range Hypervisors {
+		fmt.Printf("k: %+v v: %+v\n", k, v)
+	}
+
+	VirtualMachines := map[string]*VM{}
 	for _, vm := range vms {
 		entry := new(VM)
-		entry.name = vm.Name
-		entry.ram = vm.Config.Hardware.MemoryMB
-		entry.cpu = vm.Config.Hardware.NumCPU
-		x[vm.Config.Uuid] = entry
+		entry.Name = vm.Name
+		entry.MemoryMB = vm.Config.Hardware.MemoryMB
+		entry.NumCPU = vm.Config.Hardware.NumCPU
+		entry.RuntimeHost = HypervisorTranslate[vm.Runtime.Host.Value]
+		entry.PowerState = vm.Runtime.PowerState
+		entry.Annotation = vm.Config.Annotation
+		VirtualMachines[vm.Config.Uuid] = entry
 	}
 
 	fmt.Println("Before sort:")
-	for k, v := range x {
+	for k, v := range VirtualMachines {
 		fmt.Printf("k: %+v v: %+v\n", k, v)
 	}
+
 }
