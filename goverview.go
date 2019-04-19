@@ -8,11 +8,19 @@ import (
 	"log"
 	"net/url"
 	"os"
+	//"sort"
 
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/view"
 	"github.com/vmware/govmomi/vim25/mo"
 )
+
+// VM struct
+type VM struct {
+	name string
+	ram  int32
+	cpu  int32
+}
 
 func main() {
 	ctx := context.Background()
@@ -59,25 +67,18 @@ func main() {
 		"name",
 		"snapshot",
 		"layoutEx.file",
-		"guest.hostName",
-		"config.guestFullName",
 		"summary.quickStats.overallCpuUsage",
 		"summary.quickStats.uptimeSeconds",
 		"summary.customValue",
 		"summary.quickStats",
-		"config.hardware.memoryMB",
-		"config.hardware.numCPU",
-		"config.hardware.device",
-		"config.annotation",
 		"summary.runtime.powerState",
 		"runtime.host",
 		"network",
 		"guest.toolsRunningStatus",
 		"guest.toolsVersionStatus",
+		"guest.hostName",
 		"guest.net",
 		"guest.guestState",
-		"config.guestId",
-		"config.version",
 		"runtime",
 		"config",
 	}
@@ -114,8 +115,27 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// fmt.Println(vms)
+	x := map[string]*VM{}
+
+	// 	"555": {name: "berra", ram: 4096, cpu: 1},
+	// 	"111": {name: "sven", ram: 2048, cpu: 1},
+	// 	"999": {name: "adam", ram: 1024, cpu: 2},
+	// 	"444": {name: "ylva", ram: 4096, cpu: 4},
+	// 	"222": {name: "fred", ram: 512, cpu: 1},
+	// 	"000": {name: "caesar", ram: 4096, cpu: 8},
+	// 	"888": {name: "jojo", ram: 8192, cpu: 1},
+	// }
+	// x["123"] = {name: "berra", ram: 4096, cpu: 1}
 	for _, vm := range vms {
-		fmt.Printf("%s\t%s\t%s\t%d\t%s\n", vm.Name, vm.Config.GuestFullName, vm.Config.GuestId, vm.Config.Hardware.MemoryMB, vm.Config.Annotation)
+		entry := new(VM)
+		entry.name = vm.Name
+		entry.ram = vm.Config.Hardware.MemoryMB
+		entry.cpu = vm.Config.Hardware.NumCPU
+		x[vm.Config.Uuid] = entry
+	}
+
+	fmt.Println("Before sort:")
+	for k, v := range x {
+		fmt.Printf("k: %+v v: %+v\n", k, v)
 	}
 }
